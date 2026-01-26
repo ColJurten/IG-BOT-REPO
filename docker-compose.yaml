@@ -8,11 +8,21 @@ services:
     volumes:
       - ./data:/app/data
 
+  ig-automation:
+    build: ./ig-automation
+    env_file: ./ig-automation/.env
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - ./ig-automation-data:/app/data
+
   nginx:
     image: nginx:1.27-alpine
     restart: unless-stopped
     depends_on:
       - igbot
+      - ig-automation
     ports:
       - "80:80"
       - "443:443"
