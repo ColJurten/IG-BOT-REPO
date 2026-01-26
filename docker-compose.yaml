@@ -1,6 +1,6 @@
 services:
   igbot:
-    build: ./server
+    image: yourdockerhubusername/igbot:latest
     env_file: .env
     restart: unless-stopped
     networks:
@@ -9,7 +9,7 @@ services:
       - ./data:/app/data
 
   ig-automation:
-    build: ./ig-automation
+    image: yourdockerhubusername/ig-automation:latest
     env_file: ./ig-automation/.env
     restart: unless-stopped
     networks:
