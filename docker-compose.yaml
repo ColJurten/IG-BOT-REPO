@@ -1,0 +1,28 @@
+services:
+  igbot:
+    build: ./server
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - ./data:/app/data
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - igbot
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/www:/var/www/certbot:ro
+      - ./nginx/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
