@@ -309,8 +309,8 @@ def start_polling():
 def verify_webhook():
     """Handle webhook verification from Meta"""
     mode = request.args.get("hub.mode")
-    token = request.args.get("hub. verify_token")
-    challenge = request.args.get("hub. challenge")
+    token = request.args.get("hub.verify_token")
+    challenge = request.args.get("hub.challenge")
     
     print(f"Webhook verification:  mode={mode}, token={token}")
     
