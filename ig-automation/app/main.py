@@ -152,7 +152,7 @@ def send_initial_message(recipient_id):
 
 1️⃣ Подпишись на мою страницу
 
-2️⃣ Ответь «Oui» на это сообщение
+2️⃣ Ответь «смайлик» на это сообщение
 
 ⚠️ Ссылка действует 12 часов, так что не упусти шанс!"""
     
@@ -167,7 +167,7 @@ def send_not_following_message(recipient_id):
     """Send message when user is not following"""
     message = """Я не вижу твою подписку 💔
 
-Подпишись на мою страницу и снова ответь «Oui»!"""
+Подпишись на мою страницу и снова ответь «смайлик»!"""
     
     try: 
         send_dm_to_user(recipient_id, message)
@@ -201,7 +201,7 @@ def send_initial_message_via_comment(comment_id):
 
 1️⃣ Подпишись на мою страницу
 
-2️⃣ Ответь «Oui» на это сообщение
+2️⃣ Ответь «смайлик» на это сообщение
 
 ⚠️ Ссылка действует 12 часов, так что не упусти шанс!"""
     
@@ -366,10 +366,10 @@ def handle_webhook():
                 
                 print(f"📩 DM received from {sender_id}:  {text}")
                 
-                # Check for YES response (case insensitive, multiple languages)
+                # Check for смайлик  response (case insensitive, multiple languages)
                 text_clean = text.upper().strip()
-                if text_clean in ["YES", "OUI", "Y", "DA", "SI", "ДА", "JA"]:
-                    print(f"✅ YES detected from {sender_id}, checking follower status...")
+                if text_clean in ["СМАЙЛИК"]:
+                    print(f"✅ смайлик detected from {sender_id}, checking follower status...")
                     
                     is_follower = check_if_user_follows(sender_id)
                     
