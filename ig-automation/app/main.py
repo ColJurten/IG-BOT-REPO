@@ -146,14 +146,15 @@ def check_if_user_follows(user_id):
 
 def send_initial_message(recipient_id):
     """Send the initial welcome message asking to follow and reply YES"""
-    message = """✨ Welcome! 
+    message = """Привет!
 
-To get access to the exclusive content: 
+Чтобы получить доступ к эксклюзивному контенту:
 
-1️⃣ Follow my page
-2️⃣ Reply "YES" to this message
+1️⃣ Подпишись на мою страницу
 
-⚠️ The link expires in 12 hours, so grab it NOW!"""
+2️⃣ Ответь «Oui» на это сообщение
+
+⚠️ Ссылка действует 12 часов, так что не упусти шанс!"""
     
     try:
         send_dm_to_user(recipient_id, message)
@@ -164,9 +165,9 @@ To get access to the exclusive content:
 
 def send_not_following_message(recipient_id):
     """Send message when user is not following"""
-    message = """I don't see your subscription 💔
+    message = """Я не вижу твою подписку 💔
 
-Please follow my page and reply "YES" again! """
+Подпишись на мою страницу и снова ответь «Oui»!"""
     
     try: 
         send_dm_to_user(recipient_id, message)
@@ -177,13 +178,13 @@ Please follow my page and reply "YES" again! """
 
 def send_success_message(recipient_id):
     """Send success message with Telegram link"""
-    message = f"""🎉 All done, congratulations!  🤍
+    message = f"""Готово, поздравляю 🇫🇷✨
 
-Here is your exclusive access: 
+Вот твой эксклюзивный доступ: 
 {TELEGRAM_LINK}
 
-⏳ Remember, the link expires in 12 hours. 
-Grab it NOW!"""
+⏳ Помни, ссылка действует 12 часов. 
+Успей воспользоваться!"""
     
     try:
         send_dm_to_user(recipient_id, message)
@@ -194,14 +195,15 @@ Grab it NOW!"""
 
 def send_initial_message_via_comment(comment_id):
     """Send the initial welcome message as a private reply to a comment"""
-    message = """✨ Welcome!
+    message = """Привет!
 
-To get access to the exclusive content:
+Чтобы получить доступ к эксклюзивному контенту:
 
-1️⃣ Follow my page
-2️⃣ Reply "YES" to this message
+1️⃣ Подпишись на мою страницу
 
-⚠️ The link expires in 12 hours, so grab it NOW!"""
+2️⃣ Ответь «Oui» на это сообщение
+
+⚠️ Ссылка действует 12 часов, так что не упусти шанс!"""
     
     try:
         send_private_reply_to_comment(comment_id, message)
