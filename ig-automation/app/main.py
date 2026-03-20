@@ -13,11 +13,13 @@ app = Flask(__name__)
 # Configuration from environment variables
 VERIFY_TOKEN = os.getenv("META_VERIFY_TOKEN", "my_secure_verify_token_123")
 PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
+MESSAGE_ACCESS_TOKEN = os.getenv("META_DEV_MESSAGE_TOKEN") or PAGE_ACCESS_TOKEN
 PAGE_ID = os.getenv("PAGE_ID")
 IG_BUSINESS_ID = os.getenv("IG_BUSINESS_ID")
 TARGET_MEDIA_ID = os.getenv("TARGET_MEDIA_ID")
 KEYWORD = os.getenv("KEYWORD", "INFO").lower()
 TELEGRAM_LINK = os.getenv("TELEGRAM_LINK", "https://t.me/your_channel")
+STRICT_FOLLOW_CHECK = os.getenv("STRICT_FOLLOW_CHECK", "false").lower() == "true"
 
 POLL_INTERVAL_SEC = max(10, int(os.getenv("POLL_INTERVAL_SEC", "20")))
 PRIVATE_REPLY_MAX_AGE_SEC = max(60, int(os.getenv("PRIVATE_REPLY_MAX_AGE_SEC", "900")))
@@ -61,10 +63,10 @@ def persist_seen_comments():
 
 def send_dm_to_user(recipient_id, text):
     """Send a DM to a user using their ID (same as Node.js bot)"""
-    if not PAGE_ACCESS_TOKEN: 
-        raise Exception("Missing PAGE_ACCESS_TOKEN")
+    if not MESSAGE_ACCESS_TOKEN:
+        raise Exception("Missing MESSAGE_ACCESS_TOKEN")
 
-    url = f"{GRAPH_API_URL}/me/messages? access_token={PAGE_ACCESS_TOKEN}"
+    url = f"{GRAPH_API_URL}/me/messages?access_token={MESSAGE_ACCESS_TOKEN}"
     
     payload = {
         "recipient": {"id": recipient_id},
@@ -112,7 +114,7 @@ def check_if_user_follows(user_id):
     Check if a user follows the Instagram account. 
     Uses the Instagram Graph API to check follower status.
     """
-    if not PAGE_ACCESS_TOKEN or not IG_BUSINESS_ID: 
+    if not MESSAGE_ACCESS_TOKEN or not IG_BUSINESS_ID:
         print("Missing credentials for follower check, assuming follower")
         return True
     
@@ -121,7 +123,7 @@ def check_if_user_follows(user_id):
         url = f"{GRAPH_API_URL}/{user_id}"
         params = {
             "fields": "id,username,name,is_user_follow_business,is_business_follow_user",
-            "access_token": PAGE_ACCESS_TOKEN
+            "access_token": MESSAGE_ACCESS_TOKEN
         }
         
         response = requests.get(url, params=params)
@@ -133,15 +135,22 @@ def check_if_user_follows(user_id):
             # Check if user follows us
             is_follower = data.get("is_user_follow_business", False)
             return is_follower
-        else: 
-            print(f"Follower check failed: {response. status_code} - {response. text}")
-            # On API error, we could default to True or False
-            # Let's default to False to encourage following
-            return False
+        else:
+            print(f"Follower check failed: {response.status_code} - {response.text}")
+            try:
+                err = response.json().get("error", {})
+                if err.get("code") == 200:
+                    # Missing advanced access cannot be treated as "not following".
+                    return None
+            except Exception:
+                pass
+
+            # Non-permission API errors are treated as unknown follower status.
+            return None
             
-    except Exception as e: 
+    except Exception as e:
         print(f"Error checking follower status: {e}")
-        return False
+        return None
 
 
 def send_initial_message(recipient_id):
@@ -373,12 +382,19 @@ def handle_webhook():
                     
                     is_follower = check_if_user_follows(sender_id)
                     
-                    if is_follower:
+                    if is_follower is True:
                         print(f"✅ User {sender_id} IS a follower!  Sending success message.")
                         send_success_message(sender_id)
-                    else:
+                    elif is_follower is False:
                         print(f"❌ User {sender_id} is NOT a follower.  Sending reminder.")
                         send_not_following_message(sender_id)
+                    else:
+                        if STRICT_FOLLOW_CHECK:
+                            print(f"⚠️ Could not verify follower status for {sender_id}. Strict check enabled, sending reminder.")
+                            send_not_following_message(sender_id)
+                        else:
+                            print(f"⚠️ Could not verify follower status for {sender_id}. Sending success message by fallback.")
+                            send_success_message(sender_id)
                     
                     return jsonify({"status": "ok"}), 200
                 
